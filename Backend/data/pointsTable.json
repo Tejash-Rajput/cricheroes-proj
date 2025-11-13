@@ -1,0 +1,62 @@
+[
+  {
+    "team": "Chennai Super Kings",
+    "matches": 7,
+    "wins": 5,
+    "losses": 2,
+    "nrr": 0.771,
+    "runsFor": 1130,
+    "ballsFaced": 133.1667,
+    "runsAgainst": 1071,
+    "ballsBowled": 138.8333,
+    "points": 10
+  },
+  {
+    "team": "Royal Challengers Bangalore",
+    "matches": 7,
+    "wins": 4,
+    "losses": 3,
+    "nrr": 0.597,
+    "runsFor": 1217,
+    "ballsFaced": 140.0000,
+    "runsAgainst": 1066,
+    "ballsBowled": 131.6667,
+    "points": 8
+  },
+  {
+    "team": "Delhi Capitals",
+    "matches": 7,
+    "wins": 4,
+    "losses": 3,
+    "nrr": 0.319,
+    "runsFor": 1085,
+    "ballsFaced": 126.0000,
+    "runsAgainst": 1136,
+    "ballsBowled": 137.0000,
+    "points": 8
+  },
+  {
+    "team": "Rajasthan Royals",
+    "matches": 7,
+    "wins": 3,
+    "losses": 4,
+    "nrr": 0.331,
+    "runsFor": 1066,
+    "ballsFaced": 128.3333,
+    "runsAgainst": 1094,
+    "ballsBowled": 137.1667,
+    "points": 6
+  },
+  {
+    "team": "Mumbai Indians",
+    "matches": 8,
+    "wins": 2,
+    "losses": 6,
+    "nrr": -1.75,
+    "runsFor": 1003,
+    "ballsFaced": 155.3333,
+    "runsAgainst": 1134,
+    "ballsBowled": 138.1667,
+    "points": 4
+  }
+]
