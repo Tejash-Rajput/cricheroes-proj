@@ -20,4 +20,5 @@ export const cricApi = createApi({
   }),
 });
 
-export const { useCalculatePerformanceMutation, useGetPointsTableQuery, useGetTeamsQuery } = cricApi;
+export const { useCalculatePerformanceMutation, useGetPointsTableQuery, useGetTeamsQuery } =
+  cricApi;

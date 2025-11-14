@@ -38,62 +38,93 @@ function Homepage() {
       navigate('/result');
     } catch (err) {
       setError('API error. Check your input and try again.');
+      console.log('API Error:', err);
     }
   };
 
-  if (teamsLoading) return <div style={{ textAlign: 'center', marginTop: '3rem', fontSize: 20 }}>Loading teams...</div>;
+  if (teamsLoading)
+    return (
+      <div style={{ textAlign: 'center', marginTop: '3rem', fontSize: 20 }}>Loading teams...</div>
+    );
 
   return (
-    <div style={{
-      maxWidth: 420,
-      margin: '3rem auto',
-      fontFamily: 'Montserrat, Arial, sans-serif',
-      padding: '36px 36px 28px',
-      borderRadius: 18,
-      background: '#f9f9fd',
-      boxShadow: '0 6px 32px rgba(14,58,134,0.08)',
-      border: '1px solid #e0e3ef',
-      minHeight: 520,
-    }}>
-      <h2 style={{
-        textAlign: 'center', fontWeight: 700,
-        color: '#142850', letterSpacing: '0.04em', marginBottom: 26
-      }}>
+    <div
+      style={{
+        maxWidth: 420,
+        margin: '3rem auto',
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        padding: '36px 36px 28px',
+        borderRadius: 18,
+        background: '#f9f9fd',
+        boxShadow: '0 6px 32px rgba(14,58,134,0.08)',
+        border: '1px solid #e0e3ef',
+        minHeight: 520,
+      }}
+    >
+      <h2
+        style={{
+          textAlign: 'center',
+          fontWeight: 700,
+          color: '#142850',
+          letterSpacing: '0.04em',
+          marginBottom: 26,
+        }}
+      >
         IPL Points Table Calculator
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <label style={{ color: '#022f5e', fontWeight: 600 }}>Your Team
-          <select value={team} onChange={e => setTeam(e.target.value)} style={selectStyle}>
+        <label style={{ color: '#022f5e', fontWeight: 600 }}>
+          Your Team
+          <select value={team} onChange={(e) => setTeam(e.target.value)} style={selectStyle}>
             <option value="">Select Team</option>
             {teams?.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         </label>
 
-        <label style={{ color: '#022f5e', fontWeight: 600 }}>Opposition Team
-          <select value={opponent} onChange={e => setOpponent(e.target.value)} style={selectStyle}>
+        <label style={{ color: '#022f5e', fontWeight: 600 }}>
+          Opposition Team
+          <select
+            value={opponent}
+            onChange={(e) => setOpponent(e.target.value)}
+            style={selectStyle}
+          >
             <option value="">Select Opponent</option>
-            {teams?.filter((t) => t !== team).map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
+            {teams
+              ?.filter((t) => t !== team)
+              .map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
           </select>
         </label>
 
-        <label style={{ color: '#022f5e', fontWeight: 600 }}>Match Overs
-          <select value={overs} onChange={e => setOvers(e.target.value)} style={selectStyle}>
+        <label style={{ color: '#022f5e', fontWeight: 600 }}>
+          Match Overs
+          <select value={overs} onChange={(e) => setOvers(e.target.value)} style={selectStyle}>
             <option value="">Select Overs</option>
             <option value="20">20</option>
             <option value="10">10</option>
           </select>
         </label>
 
-        <label style={{ color: '#022f5e', fontWeight: 600 }}>Desired Position
-          <select value={position} onChange={e => setPosition(e.target.value)} style={selectStyle}>
+        <label style={{ color: '#022f5e', fontWeight: 600 }}>
+          Desired Position
+          <select
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            style={selectStyle}
+          >
             <option value="">Select Position</option>
             {positions.map((pos) => (
-              <option key={pos} value={pos}>{pos}</option>
+              <option key={pos} value={pos}>
+                {pos}
+              </option>
             ))}
           </select>
         </label>
@@ -101,33 +132,50 @@ function Homepage() {
         <div style={{ color: '#022f5e', fontWeight: 600, marginBottom: 0 }}>Toss Result:</div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <label style={radioLabelStyle}>
-            <input type="radio" name="toss" checked={toss === 'bat'} value="bat" onChange={() => setToss('bat')} />
+            <input
+              type="radio"
+              name="toss"
+              checked={toss === 'bat'}
+              value="bat"
+              onChange={() => setToss('bat')}
+            />
             Batting First
           </label>
           <label style={radioLabelStyle}>
-            <input type="radio" name="toss" checked={toss === 'bowl'} value="bowl" onChange={() => setToss('bowl')} />
+            <input
+              type="radio"
+              name="toss"
+              checked={toss === 'bowl'}
+              value="bowl"
+              onChange={() => setToss('bowl')}
+            />
             Bowling First
           </label>
         </div>
 
-        <label style={{ color: '#022f5e', fontWeight: 600 }}>{toss === 'bat' ? 'Runs Scored' : toss === 'bowl' ? 'Runs to Chase' : 'Runs'}
+        <label style={{ color: '#022f5e', fontWeight: 600 }}>
+          {toss === 'bat' ? 'Runs Scored' : toss === 'bowl' ? 'Runs to Chase' : 'Runs'}
           <input
             type="number"
             min={0}
             value={runs}
-            onChange={e => setRuns(e.target.value)}
+            onChange={(e) => setRuns(e.target.value)}
             style={inputStyle}
             placeholder="Enter runs (e.g. 120)"
           />
         </label>
 
-        {error && <div style={{ color: '#de2331', fontWeight: 600, marginTop: 8, textAlign: 'center' }}>{error}</div>}
-        {apiError && <div style={{ color: '#de2331', fontWeight: 600, marginTop: 8, textAlign: 'center' }}>API Error: {apiError.data?.error || apiError.error}</div>}
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading}
-          style={buttonStyle}
-        >
+        {error && (
+          <div style={{ color: '#de2331', fontWeight: 600, marginTop: 8, textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
+        {apiError && (
+          <div style={{ color: '#de2331', fontWeight: 600, marginTop: 8, textAlign: 'center' }}>
+            API Error: {apiError.data?.error || apiError.error}
+          </div>
+        )}
+        <button onClick={handleSubmit} disabled={isLoading} style={buttonStyle}>
           {isLoading ? 'Calculating...' : 'Calculate'}
         </button>
       </div>
@@ -175,7 +223,12 @@ const buttonStyle = {
   transition: 'background 0.17s',
 };
 const radioLabelStyle = {
-  display: 'flex', alignItems: 'center', gap: 5, color: '#01356a', fontWeight: 500, fontSize: 15,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 5,
+  color: '#01356a',
+  fontWeight: 500,
+  fontSize: 15,
 };
 
 export default Homepage;

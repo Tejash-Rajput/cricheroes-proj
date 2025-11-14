@@ -1,13 +1,13 @@
 // Unit tests for helper functions in utils/iplCalculations.js
 // Requires: jest installed as devDependency
 
-const { 
-  ballsToOvers, 
-  calculateNRR, 
-  simulateMatch, 
-  getTeamPosition 
-} = require('../utils/iplCalculations');
-const pointsTable = require('../data/pointsTable.json');
+const {
+  ballsToOvers,
+  calculateNRR,
+  simulateMatch,
+  getTeamPosition
+} = require('../src/utils/iplCalculations');
+const pointsTable = require('../src/data/pointsTable.json');
 
 describe('ballsToOvers - convert balls to overs format', () => {
   test('converts 6 balls to 1 over', () => {
@@ -15,7 +15,7 @@ describe('ballsToOvers - convert balls to overs format', () => {
   });
 
   test('converts 7 balls to 1.1 overs', () => {
-    expect(ballsToOvers(7)).toBeCloseTo(1 + 1/6, 5);
+    expect(ballsToOvers(7)).toBeCloseTo(1 + 1 / 6, 5);
   });
 
   test('converts 0 balls to 0 overs', () => {

@@ -1,8 +1,8 @@
 // Integration test for calculatePerformanceRange exported by utils
 // Requires: jest installed as devDependency
 
-const { calculatePerformanceRange } = require('../utils/iplCalculations');
-const pointsTable = require('../data/pointsTable.json');
+const { calculatePerformanceRange } = require('../src/utils/iplCalculations');
+const pointsTable = require('../src/data/pointsTable.json');
 
 describe('calculatePerformanceRange', () => {
     test('returns expected fields for batting input', async () => {

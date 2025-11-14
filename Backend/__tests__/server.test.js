@@ -2,8 +2,8 @@
 // Requires: jest & supertest installed as devDependencies
 
 const request = require('supertest');
-const app = require('../app');
-const pointsTable = require('../data/pointsTable.json');
+const app = require('../src/app');
+const pointsTable = require('../src/data/pointsTable.json');
 
 describe('Backend API - basic endpoints and validation', () => {
     test('GET / returns welcome text', async () => {
@@ -36,7 +36,7 @@ describe('Backend API - basic endpoints and validation', () => {
         const payload = {
             team: pointsTable[0].team,
             opponent: pointsTable[1].team,
-            overs: 20,
+            overs: '20',
             runs: 150,
             toss: 'bat',
             desiredPosition: 2

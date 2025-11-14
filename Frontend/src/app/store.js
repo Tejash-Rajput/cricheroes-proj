@@ -5,6 +5,5 @@ export const store = configureStore({
   reducer: {
     [cricApi.reducerPath]: cricApi.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(cricApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(cricApi.middleware),
 });
