@@ -44,7 +44,7 @@ const validateCalculateRequest = (req, res, next) => {
     });
   }
 
-  req.validatedBody = value;
+  req.cleanedBody = value;
   next();
 };
 

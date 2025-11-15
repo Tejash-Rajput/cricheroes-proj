@@ -1,216 +1,182 @@
-// --- Helper Functions ---
+// --- Util Functions ---
 
-/**
- * Converts total balls into a decimal representation of overs.
- */
-const ballsToOvers = (balls) => {
-  const wholeOvers = Math.floor(balls / 6);
-  const remainingBalls = balls % 6;
-  return wholeOvers + remainingBalls / 6;
-};
-
-/**
- * Converts a decimal overs representation back to O.B format.
- */
-const decimalOversToDisplay = (decimalOvers) => {
-  const totalBalls = Math.round(decimalOvers * 6);
-  const ov = Math.floor(totalBalls / 6);
-  const balls = totalBalls % 6;
-  return parseFloat(`${ov}.${balls}`);
-};
-
-/**
- * Calculates NRR for a team.
- */
-function calculateNRR(runsFor, ballsFaced, runsAgainst, ballsBowled) {
-  const oversFaced = ballsToOvers(ballsFaced);
-  const oversBowled = ballsToOvers(ballsBowled);
-  if (oversFaced === 0 || oversBowled === 0) return 0;
-  return Number((runsFor / oversFaced - runsAgainst / oversBowled).toFixed(3));
+function ballsToOversFormat(balls) {
+  let overs = Math.floor(balls / 6);
+  let remBalls = balls % 6;
+  return Number(`${overs}.${remBalls}`);
 }
 
-/**
- * Simulates a match and returns a new points table.
- */
-function simulateMatch(
-  pointsTable,
+function oversToBallsFormat(overs) {
+  let [fullOvers, partBalls] = String(overs).split('.');
+  return Number(fullOvers) * 6 + Number(partBalls || 0);
+}
+
+function calculateRunRateTotal(runsMade, ballsUsed, runsGiven, ballsBowled) {
+  let teamOversFaced = ballsUsed / 6;
+  let teamOversBowled = ballsBowled / 6;
+  if (teamOversFaced === 0 || teamOversBowled === 0) return 0;
+  return Number((runsMade / teamOversFaced - runsGiven / teamOversBowled).toFixed(3));
+}
+
+function simulateGame(
+  tableData,
   team,
   opponent,
-  teamWon,
-  runsForMatch,
-  ballsFacedMatch,
-  runsAgainstMatch,
-  ballsBowledMatch
+  didWin,
+  thisruns,
+  ballsUsedThisMatch,
+  runsConcededThisMatch,
+  ballsBowledThisMatch
 ) {
-  const newTable = JSON.parse(JSON.stringify(pointsTable));
-  const teamData = newTable.find((t) => t.team === team);
-  const oppData = newTable.find((t) => t.team === opponent);
-  if (!teamData || !oppData) throw new Error('Team or opponent not found');
+  let clonedTable = JSON.parse(JSON.stringify(tableData));
+  let player = clonedTable.find((t) => t.name === team);
+  let clopponent = clonedTable.find((t) => t.name === opponent);
+  if (!player || !clopponent) throw new Error('Team or opponent missing');
 
-  teamData.matches++;
-  oppData.matches++;
-
-  if (teamWon) {
-    teamData.wins++;
-    teamData.points += 2;
-    oppData.losses++;
+  player.gamesPlayed++;
+  clopponent.gamesPlayed++;
+  if (didWin) {
+    player.victories++;
+    player.scorePoints += 2;
+    clopponent.defeats++;
   } else {
-    oppData.wins++;
-    oppData.points += 2;
-    teamData.losses++;
+    clopponent.victories++;
+    clopponent.scorePoints += 2;
+    player.defeats++;
   }
 
-  teamData.runsFor += runsForMatch;
-  teamData.ballsFaced += ballsFacedMatch;
-  teamData.runsAgainst += runsAgainstMatch;
-  teamData.ballsBowled += ballsBowledMatch;
+  player.runsScored += thisruns;
+  player.ballsFaced += ballsUsedThisMatch;
+  player.runsAllowed += runsConcededThisMatch;
+  player.ballsBowled += ballsBowledThisMatch;
 
-  oppData.runsFor += runsAgainstMatch;
-  oppData.ballsFaced += ballsBowledMatch;
-  oppData.runsAgainst += runsForMatch;
-  oppData.ballsBowled += ballsFacedMatch;
+  opponent.runsScored += runsConcededThisMatch;
+  opponent.ballsFaced += ballsBowledThisMatch;
+  opponent.runsAllowed += thisruns;
+  opponent.ballsBowled += ballsUsedThisMatch;
 
-  teamData.nrr = calculateNRR(
-    teamData.runsFor,
-    teamData.ballsFaced,
-    teamData.runsAgainst,
-    teamData.ballsBowled
+  player.netRunRate = calculateRunRateTotal(
+    player.runsScored,
+    player.ballsFaced,
+    player.runsAllowed,
+    player.ballsBowled
   );
-  oppData.nrr = calculateNRR(
-    oppData.runsFor,
-    oppData.ballsFaced,
-    oppData.runsAgainst,
-    oppData.ballsBowled
+  opponent.netRunRate = calculateRunRateTotal(
+    opponent.runsScored,
+    opponent.ballsFaced,
+    opponent.runsAllowed,
+    opponent.ballsBowled
   );
-
-  return newTable;
+  return clonedTable;
 }
 
-/**
- * Gets team position (1 = top).
- */
-function getTeamPosition(pointsTable, team) {
-  const sorted = [...pointsTable].sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    return b.nrr - a.nrr;
+function rankTeam(tableData, team) {
+  let sorted = [...tableData].sort((a, b) => {
+    if (b.scorePoints !== a.scorePoints) return b.scorePoints - a.scorePoints;
+    return b.netRunRate - a.netRunRate;
   });
-  return sorted.findIndex((t) => t.team === team) + 1;
+  return sorted.findIndex((t) => t.name === team) + 1;
 }
 
-function findRestrictRangeBatting(input, pointsTable) {
-  const { team, opponent, runs, overs, desiredPosition } = input;
+function findBattingRestriction(config, tableData) {
+  let { team, opponent, runs, overs, desiredPosition } = config;
+  let minimum = null,
+    maximum = null,
+    bestNrr = null,
+    worstNrr = null,
+    hasFound = false;
 
-  let minRestrict = null;
-  let maxRestrict = null;
-  let bestNRR = null,
-    worstNRR = null;
-  let inRange = false;
-
-  for (let oppRuns = 0; oppRuns < runs; oppRuns++) {
-    const sim = simulateMatch(
-      pointsTable,
+  for (let opponentRuns = 0; opponentRuns < runs; opponentRuns++) {
+    let simTable = simulateGame(
+      tableData,
       team,
       opponent,
       true,
       runs,
       overs * 6,
-      oppRuns,
+      opponentRuns,
       overs * 6
     );
-    const rr = sim.find((t) => t.team === team);
-    const pos = getTeamPosition(sim, team);
-
+    let resultData = simTable.find((t) => t.name === team);
+    let pos = rankTeam(simTable, team);
     if (pos === desiredPosition) {
-      if (!inRange) {
-        minRestrict = oppRuns;
-        bestNRR = rr.nrr;
-        inRange = true;
+      if (!hasFound) {
+        minimum = opponentRuns;
+        bestNrr = resultData.netRunRate;
+        hasFound = true;
       }
-      maxRestrict = oppRuns;
-      worstNRR = rr.nrr;
-    } else if (inRange) {
+      maximum = opponentRuns;
+      worstNrr = resultData.netRunRate;
+    } else if (hasFound) {
       break;
     }
   }
-
   return {
-    minRestrictRuns: minRestrict ?? 0,
-    maxRestrictRuns: maxRestrict ?? 0,
+    restrictionMin: minimum ?? 0,
+    restrictionMax: maximum ?? 0,
     overs,
-    revisedNRRMin: +(worstNRR ?? 0).toFixed(3),
-    revisedNRRMax: +(bestNRR ?? 0).toFixed(3),
+    nrrWorst: +(worstNrr ?? 0).toFixed(3),
+    nrrBest: +(bestNrr ?? 0).toFixed(3),
   };
 }
 
-function findChaseRangeBowling(input, pointsTable) {
-  const { team, opponent, runs, overs, desiredPosition } = input;
-  const target = runs + 1;
-  const maxBalls = overs * 6;
-
-  let minBalls = null;
-  let maxBallsAllowed = null;
-  let bestNRR = null,
-    worstNRR = null;
-  let inRange = false;
-
-  for (let ballsFaced = 6; ballsFaced <= maxBalls; ballsFaced++) {
-    const sim = simulateMatch(
-      pointsTable,
+function findBowlingChase(config, tableData) {
+  let { team, opponent, runs, overs, desiredPosition } = config;
+  const chaseRuns = runs + 1,
+    maxBalls = overs * 6;
+  let minBalls = null,
+    maxBallsAllowed = null,
+    bestNrr = null,
+    worstNrr = null,
+    found = false;
+  for (let ballsUsed = 6; ballsUsed <= maxBalls; ballsUsed++) {
+    let simTable = simulateGame(
+      tableData,
       team,
       opponent,
       true,
-      target,
-      ballsFaced,
+      chaseRuns,
+      ballsUsed,
       runs,
       maxBalls
     );
-    const rr = sim.find((t) => t.team === team);
-    const pos = getTeamPosition(sim, team);
-
+    let resultData = simTable.find((t) => t.name === team);
+    let pos = rankTeam(simTable, team);
     if (pos === desiredPosition) {
-      if (!inRange) {
-        minBalls = ballsFaced;
-        bestNRR = rr.nrr;
-        inRange = true;
+      if (!found) {
+        minBalls = ballsUsed;
+        bestNrr = resultData.netRunRate;
+        found = true;
       }
-      maxBallsAllowed = ballsFaced;
-      worstNRR = rr.nrr;
-    } else if (inRange) {
+      maxBallsAllowed = ballsUsed;
+      worstNrr = resultData.netRunRate;
+    } else if (found) {
       break;
     }
   }
-
-  const toDisplay = (balls) => {
-    const o = Math.floor(balls / 6);
-    const b = balls % 6;
-    return +(o + b / 10).toFixed(1);
-  };
-
+  let displayOvers = (balls) => ballsToOversFormat(balls);
   return {
-    runsToChase: target,
-    minOvers: toDisplay(minBalls ?? 0),
-    maxOvers: toDisplay(maxBallsAllowed ?? 0),
-    revisedNRRMin: +(worstNRR ?? 0).toFixed(3),
-    revisedNRRMax: +(bestNRR ?? 0).toFixed(3),
+    chaseTarget: chaseRuns,
+    minOvers: displayOvers(minBalls ?? 0),
+    maxOvers: displayOvers(maxBallsAllowed ?? 0),
+    nrrWorst: +(worstNrr ?? 0).toFixed(3),
+    nrrBest: +(bestNrr ?? 0).toFixed(3),
   };
 }
 
-/**
- * Main controller
- */
-async function calculatePerformanceRange(input, pointsTable) {
-  if (input.toss === 'bat') {
-    return findRestrictRangeBatting(input, pointsTable);
+async function getPerformanceRange(config, tableData) {
+  if (config.toss === 'bat') {
+    return findBattingRestriction(config, tableData);
   } else {
-    return findChaseRangeBowling(input, pointsTable);
+    return findBowlingChase(config, tableData);
   }
 }
 
 module.exports = {
-  calculatePerformanceRange,
-  calculateNRR,
-  simulateMatch,
-  getTeamPosition,
-  ballsToOvers,
-  decimalOversToDisplay,
+  getPerformanceRange,
+  calculateRunRateTotal,
+  simulateGame,
+  rankTeam,
+  ballsToOversFormat,
+  oversToBallsFormat,
 };

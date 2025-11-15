@@ -3,6 +3,6 @@ const router = express.Router();
 const calculateController = require('../controllers/calculateController');
 const { validateCalculateRequest } = require('../middleware/validateCalculate');
 
-router.post('/', validateCalculateRequest, calculateController.calculatePerformance);
+router.post('/', validateCalculateRequest, calculateController.handlePerformanceQuery);
 
 module.exports = router;

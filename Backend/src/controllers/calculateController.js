@@ -1,12 +1,10 @@
-const pointsTable = require('../data/pointsTable.json');
-const { calculatePerformanceRange } = require('../utils/iplCalculations');
+const pointsTable = require('../data/pointsTable.json'); // Updated path for new table format
+const { getPerformanceRange } = require('../utils/iplCalculations');
 
-exports.calculatePerformance = async (req, res) => {
-  // Use pre-validated body from middleware
-  const { team, opponent, overs, runs, toss, desiredPosition } = req.validatedBody;
-
+exports.handlePerformanceQuery = async (req, res) => {
+  const { team, opponent, overs, runs, toss, desiredPosition } = req.cleanedBody;
   try {
-    const calculationResult = await calculatePerformanceRange(
+    const perfOutcome = await getPerformanceRange(
       {
         team,
         opponent,
@@ -22,20 +20,20 @@ exports.calculatePerformance = async (req, res) => {
       team,
       opponent,
       overs,
-      calculationResult,
-      performanceRange: {
-        minRestrictRuns: calculationResult.minRestrictRuns,
-        maxRestrictRuns: calculationResult.maxRestrictRuns,
+      perfOutcome,
+      summary: {
+        restrictionMin: perfOutcome.restrictionMin,
+        restrictionMax: perfOutcome.restrictionMax,
         runs,
         overs: Number(overs),
       },
       nrrRange: {
-        min: calculationResult.revisedNRRMin,
-        max: calculationResult.revisedNRRMax,
+        min: perfOutcome.nrrWorst,
+        max: perfOutcome.nrrBest,
       },
       pointsTable,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message || 'Calculation error' });
+    res.status(500).json({ error: err.message || 'Simulation failed' });
   }
 };

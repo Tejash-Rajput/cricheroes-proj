@@ -8,7 +8,88 @@ function ResultPage() {
   useEffect(() => {
     const stored = sessionStorage.getItem('cricData');
     if (stored) {
-      setData(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+
+      const normalizeResponse = (resp) => {
+        // If already in the UI's expected shape, return as-is
+        if (resp.calculationResult && resp.performanceRange && resp.pointsTable) return resp;
+
+        const out = { ...resp };
+
+        // Map perfOutcome -> calculationResult
+        if (!out.calculationResult && out.perfOutcome) {
+          const p = out.perfOutcome;
+          out.calculationResult = {};
+
+          // chase case
+          if (
+            p.chaseTarget !== undefined ||
+            (p.minOvers !== undefined && p.maxOvers !== undefined)
+          ) {
+            out.calculationResult.minOvers = p.minOvers ?? null;
+            out.calculationResult.maxOvers = p.maxOvers ?? null;
+            out.calculationResult.revisedNRRMin = p.nrrWorst ?? null;
+            out.calculationResult.revisedNRRMax = p.nrrBest ?? null;
+          }
+
+          // restriction case
+          if (p.restrictionMin !== undefined || p.restrictionMax !== undefined) {
+            out.calculationResult.minRestrictRuns = p.restrictionMin ?? null;
+            out.calculationResult.maxRestrictRuns = p.restrictionMax ?? null;
+            out.calculationResult.revisedNRRMin =
+              p.nrrWorst ?? out.calculationResult.revisedNRRMin ?? null;
+            out.calculationResult.revisedNRRMax =
+              p.nrrBest ?? out.calculationResult.revisedNRRMax ?? null;
+          }
+        }
+
+        // Map summary -> performanceRange (UI expects performanceRange.runs + overs)
+        if (!out.performanceRange && out.summary) {
+          const s = out.summary;
+          out.performanceRange = {
+            // prefer explicit chaseTarget if provided in perfOutcome
+            runs:
+              (out.perfOutcome && out.perfOutcome.chaseTarget) ??
+              s.runs ??
+              s.matchRuns ??
+              s.chaseTarget ??
+              null,
+            overs: s.overs ?? s.matchOvers ?? null,
+          };
+        }
+
+        // Map pointsTable entries to UI keys
+        if (Array.isArray(out.pointsTable) && out.pointsTable.length > 0) {
+          out.pointsTable = out.pointsTable.map((t) => ({
+            team: t.team ?? t.name,
+            matches: t.matches ?? t.gamesPlayed,
+            wins: t.wins ?? t.victories,
+            losses: t.losses ?? t.defeats,
+            nrr: t.nrr ?? t.netRunRate,
+            points: t.points ?? t.scorePoints,
+            ...t,
+          }));
+        }
+
+        // Ensure numeric fields are numbers to avoid .toFixed errors
+        if (out.calculationResult) {
+          [
+            'minOvers',
+            'maxOvers',
+            'minRestrictRuns',
+            'maxRestrictRuns',
+            'revisedNRRMin',
+            'revisedNRRMax',
+          ].forEach((k) => {
+            if (out.calculationResult[k] !== undefined && out.calculationResult[k] !== null)
+              out.calculationResult[k] = Number(out.calculationResult[k]);
+          });
+        }
+
+        return out;
+      };
+
+      setData(normalizeResponse(parsed));
     } else {
       navigate('/');
     }
