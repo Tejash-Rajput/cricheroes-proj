@@ -123,7 +123,7 @@ function findBattingRestriction(config, tableData) {
 
 function findBowlingChase(config, tableData) {
   let { team, opponent, runs, overs, desiredPosition } = config;
-  const chaseRuns = runs + 1,
+  const chaseRuns = runs ,
     maxBalls = overs * 6;
   let minBalls = null,
     maxBallsAllowed = null,

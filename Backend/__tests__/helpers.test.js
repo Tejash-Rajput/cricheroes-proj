@@ -43,6 +43,9 @@ describe('calculateNRR - Net Run Rate calculation', () => {
     // NRR = (100/20) - (80/20) = 5 - 4 = 1.0
     const nrr = calculateRunRateTotal(100, 120, 80, 120);
     expect(nrr).toBeCloseTo(1.0, 2);
+    // Print calculated NRR for assignment validation
+    // eslint-disable-next-line no-console
+    console.log(`NRR POSITIVE runsFor=100 ballsFaced=120 runsAgainst=80 ballsBowled=120 -> nrr=${nrr}`);
   });
 
   test('calculates negative NRR when conceding more runs', () => {
@@ -51,15 +54,17 @@ describe('calculateNRR - Net Run Rate calculation', () => {
     // NRR = (80/20) - (100/20) = 4 - 5 = -1.0
     const nrr = calculateRunRateTotal(80, 120, 100, 120);
     expect(nrr).toBeCloseTo(-1.0, 2);
+    // eslint-disable-next-line no-console
+    console.log(`NRR NEGATIVE runsFor=80 ballsFaced=120 runsAgainst=100 ballsBowled=120 -> nrr=${nrr}`);
   });
 });
 
 describe('simulateMatch - simulate a match and update points table', () => {
   test('increases matches count for both teams', () => {
-    const team = pointsTable[0].name;
-    const opponent = pointsTable[1].name;
-    const initialTeamMatches = pointsTable[0].gamesPlayed;
-    const initialOppMatches = pointsTable[1].gamesPlayed;
+    const team = pointsTable[3].name;
+    const opponent = pointsTable[2].name;
+    const initialTeamMatches = pointsTable[3].gamesPlayed;
+    const initialOppMatches = pointsTable[2].gamesPlayed;
 
     const newTable = simulateGame(
       pointsTable,
@@ -73,13 +78,15 @@ describe('simulateMatch - simulate a match and update points table', () => {
     );
     expect(newTable.find(t => t.name === team).gamesPlayed).toBe(initialTeamMatches + 1);
     expect(newTable.find(t => t.name === opponent).gamesPlayed).toBe(initialOppMatches + 1);
+    // eslint-disable-next-line no-console
+    console.log(`GAMES_PLAYED ${team}=${newTable.find(t => t.name === team).gamesPlayed} ${opponent}=${newTable.find(t => t.name === opponent).gamesPlayed}`);
   });
 
   test('updates points correctly when team wins', () => {
-    const team = pointsTable[0].name;
-    const opponent = pointsTable[1].name;
-    const initialTeamPoints = pointsTable[0].scorePoints;
-    const initialOppPoints = pointsTable[1].scorePoints;
+    const team = pointsTable[3].name;
+    const opponent = pointsTable[2].name;
+    const initialTeamPoints = pointsTable[3].scorePoints;
+    const initialOppPoints = pointsTable[2].scorePoints;
 
     const newTable = simulateGame(
       pointsTable,
@@ -93,6 +100,8 @@ describe('simulateMatch - simulate a match and update points table', () => {
     );
     expect(newTable.find(t => t.name === team).scorePoints).toBe(initialTeamPoints + 2);
     expect(newTable.find(t => t.name === opponent).scorePoints).toBe(initialOppPoints);
+    // eslint-disable-next-line no-console
+    console.log(`POINTS ${team}=${newTable.find(t => t.name === team).scorePoints} ${opponent}=${newTable.find(t => t.name === opponent).scorePoints}`);
   });
 
   test('throws error for unknown team', () => {
