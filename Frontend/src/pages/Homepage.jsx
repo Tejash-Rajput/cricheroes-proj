@@ -4,7 +4,7 @@ import { useCalculatePerformanceMutation, useGetTeamsQuery } from './../api/cric
 import { useNavigate } from 'react-router-dom';
 
 function Homepage() {
-  const { data: teams, isLoading: teamsLoading } = useGetTeamsQuery();
+  const { data: teams, isLoading: teamsLoading, isError: teamsError, error: teamsErrorObj, refetch: refetchTeams,isFetching } = useGetTeamsQuery();
   const [team, setTeam] = useState('');
   const [opponent, setOpponent] = useState('');
   const [overs, setOvers] = useState('');
@@ -126,10 +126,37 @@ function Homepage() {
     }
   };
 
-  if (teamsLoading)
+  if (teamsLoading||isFetching)
     return (
       <div style={{ textAlign: 'center', marginTop: '3rem', fontSize: 20 }}>Loading teams...</div>
     );
+
+  // Handle case where backend doesn't return teams or returns an error
+  if (teamsError || (Array.isArray(teams) && teams.length === 0)) {
+    return (
+      <div style={{ maxWidth: 540, margin: '3rem auto', textAlign: 'center', fontFamily: 'Montserrat, Arial, sans-serif' }}>
+        <h3 style={{ color: '#d41459' }}>No teams data from backend</h3>
+        <p style={{ color: '#24305e' }}>
+          The server did not provide any teams. This means the backend endpoint may be down or
+          returning an empty response.
+        </p>
+        {teamsErrorObj && (
+          <pre style={{ textAlign: 'left', background: '#f7f7f9', padding: 12, borderRadius: 8, overflowX: 'auto' }}>
+            {JSON.stringify(teamsErrorObj, null, 2)}
+          </pre>
+        )}
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16 }}>
+          <button
+            onClick={() => refetchTeams()}
+            style={{ padding: '10px 14px', borderRadius: 8, cursor: 'pointer' }}
+          >
+            Retry
+          </button>
+          
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

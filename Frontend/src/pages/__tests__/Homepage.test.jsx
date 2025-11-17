@@ -11,8 +11,11 @@ vi.mock('../../api/cricApi', () => {
     useGetTeamsQuery: () => ({
       data: ['Chennai Super Kings', 'Royal Challengers Bangalore'],
       isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
     }),
-    useCalculatePerformanceMutation: () => [() => Promise.resolve({}), { isLoading: false }],
+    useCalculatePerformanceMutation: () => [() => Promise.resolve({}), { isLoading: false, error: null }],
   };
 });
 
