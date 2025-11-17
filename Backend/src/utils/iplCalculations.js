@@ -30,18 +30,18 @@ function simulateGame(
 ) {
   let clonedTable = JSON.parse(JSON.stringify(tableData));
   let player = clonedTable.find((t) => t.name === team);
-  let clopponent = clonedTable.find((t) => t.name === opponent);
-  if (!player || !clopponent) throw new Error('Team or opponent missing');
+  let cloneopponent = clonedTable.find((t) => t.name === opponent);
+  if (!player || !cloneopponent) throw new Error('Team or opponent missing');
 
   player.gamesPlayed++;
-  clopponent.gamesPlayed++;
+  cloneopponent.gamesPlayed++;
   if (didWin) {
     player.victories++;
     player.scorePoints += 2;
-    clopponent.defeats++;
+    cloneopponent.defeats++;
   } else {
-    clopponent.victories++;
-    clopponent.scorePoints += 2;
+    cloneopponent.victories++;
+    cloneopponent.scorePoints += 2;
     player.defeats++;
   }
 
@@ -50,10 +50,10 @@ function simulateGame(
   player.runsAllowed += runsConcededThisMatch;
   player.ballsBowled += ballsBowledThisMatch;
 
-  opponent.runsScored += runsConcededThisMatch;
-  opponent.ballsFaced += ballsBowledThisMatch;
-  opponent.runsAllowed += thisruns;
-  opponent.ballsBowled += ballsUsedThisMatch;
+  cloneopponent.runsScored += runsConcededThisMatch;
+  cloneopponent.ballsFaced += ballsBowledThisMatch;
+  cloneopponent.runsAllowed += thisruns;
+  cloneopponent.ballsBowled += ballsUsedThisMatch;
 
   player.netRunRate = calculateRunRateTotal(
     player.runsScored,
@@ -61,11 +61,11 @@ function simulateGame(
     player.runsAllowed,
     player.ballsBowled
   );
-  opponent.netRunRate = calculateRunRateTotal(
-    opponent.runsScored,
-    opponent.ballsFaced,
-    opponent.runsAllowed,
-    opponent.ballsBowled
+  cloneopponent.netRunRate = calculateRunRateTotal(
+    cloneopponent.runsScored,
+    cloneopponent.ballsFaced,
+    cloneopponent.runsAllowed,
+    cloneopponent.ballsBowled
   );
   return clonedTable;
 }
@@ -98,6 +98,7 @@ function findBattingRestriction(config, tableData) {
       overs * 6
     );
     let resultData = simTable.find((t) => t.name === team);
+    
     let pos = rankTeam(simTable, team);
     if (pos === desiredPosition) {
       if (!hasFound) {

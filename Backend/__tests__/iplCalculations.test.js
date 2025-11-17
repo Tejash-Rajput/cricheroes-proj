@@ -1,7 +1,7 @@
-// Integration test for calculatePerformanceRange exported by utils
+// Integration test for getPerformanceRange exported by utils
 // Requires: jest installed as devDependency
 
-const { calculatePerformanceRange } = require('../src/utils/iplCalculations');
+const { getPerformanceRange } = require('../src/utils/iplCalculations');
 const pointsTable = require('../src/data/pointsTable.json');
 
 describe('calculatePerformanceRange', () => {
@@ -14,12 +14,22 @@ describe('calculatePerformanceRange', () => {
             toss: 'bat',
             desiredPosition: 2
         };
+        // adapt to current schema: names are 'name' in pointsTable
+        const body = {
+            team: pointsTable[0].name,
+            opponent: pointsTable[1].name,
+            overs: 20,
+            runs: 150,
+            toss: 'bat',
+            desiredPosition: 2,
+        };
 
-        const res = await calculatePerformanceRange(input, pointsTable);
+        const res = await getPerformanceRange(body, pointsTable);
         expect(res).toBeTruthy();
-        expect(res).toHaveProperty('minRestrictRuns');
-        expect(res).toHaveProperty('maxRestrictRuns');
-        expect(res).toHaveProperty('revisedNRRMin');
-        expect(res).toHaveProperty('revisedNRRMax');
+        // For batting restriction the util returns restrictionMin/restrictionMax and nrrBest/nrrWorst
+        expect(res).toHaveProperty('restrictionMin');
+        expect(res).toHaveProperty('restrictionMax');
+        expect(res).toHaveProperty('nrrBest');
+        expect(res).toHaveProperty('nrrWorst');
     }, 20000);
 });
